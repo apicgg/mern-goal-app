@@ -1,13 +1,16 @@
+// TODO: Fix for some cases while throwing error the server crashes instead of sending json response to client!
+
 const asyncHandler = require('express-async-handler')
 
 const Goal = require('../models/goalModel')
+const User = require('../models/userModel')
 
 // @desc    Get goals
 // @route   GET /api/goals
 // @access  Private
 
 const getGoals = asyncHandler(async (req, res) => {
-  const goals = await Goal.find()
+  const goals = await Goal.find({ user: req.user })
   res.status(200).json(goals)
 })
 
@@ -22,6 +25,7 @@ const setGoal = asyncHandler(async (req, res) => {
   }
   const goal = await Goal.create({
     text: req.body.text,
+    user: req.user,
   })
 
   res.status(200).json(goal)
@@ -39,6 +43,20 @@ const updateGoal = async (req, res) => {
     throw new Error('Goal not found!')
   }
 
+  const user = await User.findById(req.user.id)
+
+  // Check for user
+  if (!user) {
+    res.status(401)
+    throw new Error('User not found')
+  }
+
+  // Make sure the logged in user matches the user of the goals
+  if (goal.user.toString() !== user.id) {
+    res.status(401)
+    throw new Error('User not authorized')
+  }
+
   const updatedGoal = await Goal.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
   })
@@ -54,10 +72,24 @@ const deleteGoal = asyncHandler(async (req, res) => {
 
   if (!goal) {
     res.status(404)
-    throw new Error('Goal not found!')
+    throw new Error('Goal not found! Might be already deleted by the user')
   }
 
-  await Goal.findOneAndDelete(req.params.id)
+  const user = await User.findById(req.user.id)
+
+  // Check for user
+  if (!user) {
+    res.status(401)
+    throw new Error('User not found')
+  }
+
+  // Make sure the logged in user matches the user of the goals
+  if (goal.user.toString() !== user.id) {
+    res.status(401)
+    throw new Error('User not authorized')
+  }
+
+  await goal.remove()
 
   res
     .status(200)
