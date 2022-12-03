@@ -6,6 +6,7 @@ const options = {
   bracketSpacing: true,
   bracketSameLine: true,
   arrowParens: 'always',
+  trailingComma: 'es5',
 }
 
 module.exports = options
