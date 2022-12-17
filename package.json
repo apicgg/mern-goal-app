@@ -4,10 +4,9 @@
   "description": "Goalsetter App",
   "main": "server.js",
   "scripts": {
-    "start": "node backend/server.js",
-    "server": "nodemon backend/server.js",
-    "client": "yarn --cwd frontend start",
-    "prettier": "prettier --write ."
+    "start": "node server/server.js",
+    "server": "nodemon server/server.js",
+    "client": "yarn --cwd client start"
   },
   "author": "Anurag Pramanik <p.anurag@outlook.com>",
   "license": "MIT",
